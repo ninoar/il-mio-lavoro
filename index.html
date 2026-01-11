@@ -55,7 +55,7 @@
         <header class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200 flex justify-between items-center no-print">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg text-white font-black">€</div>
-                <h1 class="text-lg font-black leading-none">REPORT VALORE ORA</h1>
+                <h1 class="text-lg font-black leading-none uppercase">Report Valore Ora</h1>
             </div>
             <div class="bg-blue-50 px-3 py-2 rounded-2xl border border-blue-100 flex items-center gap-1">
                 <input type="number" id="baseBenchmark" value="20.84" step="0.01" class="w-14 font-black text-blue-600 bg-transparent text-right outline-none" oninput="calculate()">
@@ -91,7 +91,13 @@
             </h3>
             <div class="space-y-3">
                 <div>
-                    <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Ore Settimanali</label>
+                    <div class="flex justify-between items-center mb-1 px-1">
+                        <label class="text-[9px] font-bold text-slate-400 uppercase">Impegno Lavorativo</label>
+                        <select id="oreMode" class="bg-blue-50 text-[9px] font-black uppercase px-2 py-1 rounded-lg text-blue-600 outline-none border border-blue-100" onchange="toggleOreMode()">
+                            <option value="ore">Ore Sett.</option>
+                            <option value="perc">% Part-time</option>
+                        </select>
+                    </div>
                     <input type="number" id="oreInput" value="17.25" step="0.01" class="w-full p-4 bg-slate-50 border-none rounded-2xl font-black shadow-inner outline-none text-blue-700" oninput="calculate()">
                 </div>
                 <div>
@@ -168,16 +174,27 @@
             calculate();
         }
 
+        function toggleOreMode() {
+            const mode = document.getElementById('oreMode').value;
+            const input = document.getElementById('oreInput');
+            let v = parseFloat(input.value) || 0;
+            // Converte tra ore (basato su 40h) e percentuale
+            input.value = mode === 'perc' ? ((v / 40) * 100).toFixed(2) : ((v * 40) / 100).toFixed(2);
+            calculate();
+        }
+
         function calculate() {
             const bench = parseFloat(document.getElementById('baseBenchmark').value) || 0;
             const stip = parseFloat(document.getElementById('stipendio').value) || 0;
             const bp = parseFloat(document.getElementById('buoniPasto').value) || 0;
-            const oreSett = parseFloat(document.getElementById('oreInput').value) || 0;
+            const oMode = document.getElementById('oreMode').value;
+            const oIn = parseFloat(document.getElementById('oreInput').value) || 0;
             const sett = parseInt(document.getElementById('settimane').value) || 0;
             const speseM = parseFloat(document.getElementById('speseMese').value) || 0;
             const mesiS = parseInt(document.getElementById('mesiSpesa').value);
             const viaggMin = parseFloat(document.getElementById('viaggio').value) || 0;
 
+            const oreSett = oMode === 'perc' ? (oIn * 40 / 100) : oIn;
             const bpTot = bp * (sett * 5);
             const speseTot = speseM * mesiS;
             const nettoF = (stip + bpTot) - speseTot;
